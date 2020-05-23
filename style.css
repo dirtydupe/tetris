@@ -1,13 +1,23 @@
  .container {
      display: flex;
+     margin-left: 80px;
+ }
+
+ #score {
+     
  }
  
  .grid {
+     margin-top: 20px;
      width: 200px;
      height: 400px;
      display: flex;
      flex-wrap: wrap;
-     background-color: rgb(191, 194, 23);
+     background-color: rgb(174, 168, 219);
+     border-color: rgb(38, 40, 61);
+     border-width: 10px;
+     border-style: solid;
+     border-radius: 20px;
  }
 
  .grid div {    
@@ -16,16 +26,21 @@
  }
 
  .tetromino {
-     background-color: cyan; 
- }
+     
+ } 
 
  .mini-grid {
-    margin-left: 50px;
+     margin-left: 50px;
+     margin-top: 20px;
      width: 80px;
      height: 80px;
      display: flex;
      flex-wrap: wrap;
-     background-color: rgb(191, 194, 23);    
+     background-color: rgb(174, 168, 219);  
+     border-color: rgb(38, 40, 61);
+     border-width: 10px;
+     border-style: solid;
+     border-radius: 20px; 
  }
 
  .mini-grid div {

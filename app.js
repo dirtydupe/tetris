@@ -2,27 +2,45 @@ document.addEventListener('DOMContentLoaded', () => {
     const grid = document.querySelector('.grid')
     let squares = Array.from(document.querySelectorAll('.grid div'))
     const scoreDisplay = document.querySelector('#score')
+    const lineDisplay = document.querySelector('#lines')
+    const levelDisplay = document.querySelector('#level')
     const startBtn = document.querySelector('#start-button')
     const width = 10
     let nextRandom = 0
+    let speed = 1000
     let timerId
+    let level = 1
     let score = 0
-    const colors = [
-        'orange', 'red', 'purple', 'green', 'blue'
-    ]
+    let totalLines = 0
+    const colors = ['orange', 'blue', 'green', 'red', 'purple', 'yellow', 'cyan']
+
     // The Tetrominoes
     const lTetromino = [
+        [0, 1, width+1, width*2+1],
+        [2, width, width+1, width+2],
+        [1, width+1, width*2+1, width*2+2],
+        [width, width+1, width+2, width*2+2]
+      ]
+
+    const rlTetromino = [
         [1, width+1, width*2+1, 2],
         [width, width+1, width+2, width*2+2],
         [1, width+1, width*2+1, width*2],
         [width, width*2, width*2+1, width*2+2]
       ]
     
-    const zTetromino = [
+    const sTetromino = [
         [0,width,width+1,width*2+1],
         [width+1, width+2,width*2,width*2+1],
         [0,width,width+1,width*2+1],
         [width+1, width+2,width*2,width*2+1]
+      ]
+
+      const zTetromino = [
+        [1,width,width+1,width*2],
+        [width, width+1,width*2+1,width*2+2],
+        [1,width,width+1,width*2],
+        [width, width+1,width*2+1,width*2+2]
       ]
     
     const tTetromino = [
@@ -46,7 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
         [width,width+1,width+2,width+3]
       ]
 
-    const theTetrominoes = [lTetromino, zTetromino, tTetromino, oTetromino, iTetromino]
+    const theTetrominoes = [lTetromino, rlTetromino, sTetromino, zTetromino, tTetromino, oTetromino, iTetromino]
 
     let currentPosition = 4
     let currentRotation = 0
@@ -71,6 +89,12 @@ document.addEventListener('DOMContentLoaded', () => {
         })
     }
 
+    // Clear the grid - Reset game
+    function clearGrid() {
+        // TODO     TESTING****
+        // ????
+    }
+
     // Assign functions to keyCodes
     function control(e) {
         if(e.keyCode === 37) {
@@ -87,6 +111,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     document.addEventListener('keydown', control)
+
+    function bypassControl() {
+        document.removeEventListener('keydown', control)
+    }
     
     function moveDown() {
         undraw()
@@ -159,11 +187,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // The tetrominos without rotations
     const upNextTetrominoes = [
-        [1, displayWidth+1, displayWidth*2+1, 2],               //lTetromino
-        [0, displayWidth, displayWidth+1, displayWidth*2+1],    //zTetromino
-        [1, displayWidth, displayWidth+1, displayWidth+2],      //tTetromino
-        [0, 1, displayWidth, displayWidth+1],                   //oTetromino
-        [1, displayWidth+1, displayWidth*2+1, displayWidth*3+1] //iTetromino
+        [0, 1, displayWidth+1, displayWidth*2+1],               // lTetromino
+        [1, displayWidth+1, displayWidth*2+1, 2],               // rlTetromino
+        [0, displayWidth, displayWidth+1, displayWidth*2+1],    // sTetromino
+        [1, displayWidth, displayWidth+1, displayWidth*2]       //  zTetromino
+        [1, displayWidth, displayWidth+1, displayWidth+2],      // tTetromino
+        [0, 1, displayWidth, displayWidth+1],                   // oTetromino
+        [1, displayWidth+1, displayWidth*2+1, displayWidth*3+1] // iTetromino
       ]
 
     // Display the shape in the mini-grid
@@ -185,8 +215,9 @@ document.addEventListener('DOMContentLoaded', () => {
             timerId = null
         }
         else {
+            clearGrid()     // TODO
             draw()
-            timerId = setInterval(moveDown, 1000)
+            timerId = setInterval(moveDown, speed)
             nextRandom = Math.floor(Math.random() * theTetrominoes.length)
             displayShape()
         }
@@ -194,12 +225,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Add score
     function addScore() {
+        let numLines = 0
         for(let i = 0; i < 199; i += width) {
             const row = [i, i+1, i+2, i+3, i+4, i+5, i+6, i+7, i+8, i+9]
 
             if(row.every(index => squares[index].classList.contains('taken'))) {
+                numLines++
                 score += 10
+                totalLines += 1
                 scoreDisplay.innerHTML = score
+                lineDisplay.innerHTML = totalLines
                 row.forEach(index => {
                     squares[index].classList.remove('taken')
                     squares[index].classList.remove('tetromino')
@@ -208,14 +243,28 @@ document.addEventListener('DOMContentLoaded', () => {
                 const squaresRemoved = squares.splice(i, width)
                 squares = squaresRemoved.concat(squares)
                 squares.forEach(cell => grid.appendChild(cell))
+
+                // Level and Speed up - based on lines and level
+                if((lines % 10) === 0) {
+                    level++
+                    levelDisplay.innerHTML = level
+                    speed = speed - (level * 50)
+                    timerId = setInterval(moveDown, speed)
+                }
             }
+        }
+        // TETRIS!
+        if(numLines === 4) {
+            score += 60
+            scoreDisplay.innerHTML = score + "  **TETRIS!**"
         }
     }
 
     function gameOver() {
         if(current.some(index => squares[currentPosition + index].classList.contains('taken'))) {
-            scoreDisplay.innerHTML = 'end'
+            scoreDisplay.innerHTML = score + "  **GAME OVER**"
             clearInterval(timerId)
+            bypassControl()
         }
     }
 })
